@@ -7,7 +7,15 @@ import pandas as pd
 from tensorflow.keras.preprocessing.text import Tokenizer
 from tensorflow.keras.preprocessing.sequence import pad_sequences
 from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import Dense, Embedding, LSTM, SpatialDropout1D, GRU, Dropout, BatchNormalization
+from tensorflow.keras.layers import (
+    Dense,
+    Embedding,
+    LSTM,
+    SpatialDropout1D,
+    GRU,
+    Dropout,
+    BatchNormalization,
+)
 from tensorflow.keras.utils import to_categorical
 from tensorflow.keras.models import load_model
 from nltk.corpus import stopwords
@@ -16,11 +24,12 @@ import warnings
 import string, time
 import contractions
 
+os.environ["TF_CPP_MIN_LOG_LEVEL"] = "2"
 warnings.filterwarnings("ignore")
 
 DATASET = "./IMDB Dataset.csv"
-TRAINED_MODEL = "gru_model.h5"
-
+TRAINED_MODEL = "gru_model_heavy.h5"
+OUTPUT_FILE = "gru_time.txt"
 
 chat_words = {
     "AFAIK": "As Far As I Know",
@@ -123,18 +132,19 @@ def parse_args():
         description="LSTM inference with GPU memory limitation and CPU core limitation."
     )
     parser.add_argument(
-        "--gpu", type=bool, default=True, help="Use GPU for inference. (Default = True)"
+        "--gpu",
+        action="store_true",
+        help="Use GPU for inference. (Default = False)",
     )
     parser.add_argument(
         "--gpu_mem_limit",
         type=int,
-        default=512,
+        default=0,
         help="Limit GPU memory usage in MB. Set to 0 for no limit. (Default = 512)",
     )
     parser.add_argument(
         "--memory_growth",
-        type=bool,
-        default=False,
+        action="store_true",
         help="Enable GPU memory growth. (Default = False)",
     )
     parser.add_argument(
@@ -219,15 +229,18 @@ def clean_text(text):
     )  # Substituting multiple spaces with single space
     return text
 
+
 def remove_url(text):
-    pattern = re.compile(r'https?://\S+|www\.\S+')
-    return pattern.sub(r'',text)
+    pattern = re.compile(r"https?://\S+|www\.\S+")
+    return pattern.sub(r"", text)
+
 
 def remove_punctuation(text):
-    return text.translate(str.maketrans('','',string.punctuation))
+    return text.translate(str.maketrans("", "", string.punctuation))
+
 
 def chat_conversion(text):
-    new_text=[]
+    new_text = []
     for w in text.split():
         if w.upper() in chat_words:
             new_text.append(chat_words[w.upper()])
@@ -235,29 +248,34 @@ def chat_conversion(text):
             new_text.append(w)
     return " ".join(new_text)
 
+
 def remove_emoji(text):
-    emoji_pattern = re.compile("["
-                           u"\U0001F600-\U0001F64F"  # emoticons
-                           u"\U0001F300-\U0001F5FF"  # symbols & pictographs
-                           u"\U0001F680-\U0001F6FF"  # transport & map symbols
-                           u"\U0001F1E0-\U0001F1FF"  # flags (iOS)
-                           u"\U00002702-\U000027B0"
-                           u"\U000024C2-\U0001F251"
-                           "]+", flags=re.UNICODE)
-    return emoji_pattern.sub(r'', text)
+    emoji_pattern = re.compile(
+        "["
+        "\U0001F600-\U0001F64F"  # emoticons
+        "\U0001F300-\U0001F5FF"  # symbols & pictographs
+        "\U0001F680-\U0001F6FF"  # transport & map symbols
+        "\U0001F1E0-\U0001F1FF"  # flags (iOS)
+        "\U00002702-\U000027B0"
+        "\U000024C2-\U0001F251"
+        "]+",
+        flags=re.UNICODE,
+    )
+    return emoji_pattern.sub(r"", text)
+
 
 def expand_contractions(text):
     expanded_text = contractions.fix(text)
     return expanded_text
 
 
-data['review'] = data['review'].str.lower()
-data['review'] = data['review'].apply(remove_url)
-data['review'] = data['review'].apply(remove_punctuation)
-data['review'] = data['review'].apply(chat_conversion)
+data["review"] = data["review"].str.lower()
+data["review"] = data["review"].apply(remove_url)
+data["review"] = data["review"].apply(remove_punctuation)
+data["review"] = data["review"].apply(chat_conversion)
 data["review"] = data["review"].apply(clean_text)
-data['review']=data['review'].apply(remove_emoji)
-data['review'] = data['review'].apply(expand_contractions)
+data["review"] = data["review"].apply(remove_emoji)
+data["review"] = data["review"].apply(expand_contractions)
 
 #####################
 # Tokenization and Seqeunce Padding
@@ -278,7 +296,7 @@ print("Found %s unique tokens." % len(word_index))
 
 X = tokenizer.texts_to_sequences(data["review"].values)
 X = pad_sequences(X, maxlen=MAX_SEQUENCE_LENGTH)
-print("Shape of data tensor:", X.shape)
+# print("Shape of data tensor:", X.shape)
 
 
 #####################
@@ -286,14 +304,14 @@ print("Shape of data tensor:", X.shape)
 #####################
 # Converting categorical labels to numbers.
 Y = pd.get_dummies(data["sentiment"]).values
-print("Shape of label tensor:", Y.shape)
+# print("Shape of label tensor:", Y.shape)
 
 # Train test split
 split_idx = int(0.8 * len(X))  # 80% training, 20% testing
 X_train, X_test = X[:split_idx], X[split_idx:]
 Y_train, Y_test = Y[:split_idx], Y[split_idx:]
 
-print(X_train.shape, Y_train.shape)
+# print(X_train.shape, Y_train.shape)
 print(X_test.shape, Y_test.shape)
 
 #####################
@@ -308,5 +326,17 @@ start_time = time.time()
 accr = loaded_model.evaluate(X_test, Y_test)
 end_time = time.time()
 
+the_time = end_time - start_time
+
 print("Test set\n  Loss: {:0.3f}\n  Accuracy: {:0.3f}".format(accr[0], accr[1]))
-print("Time taken for inference: {:.2f} seconds".format(end_time - start_time))
+print("Time taken for inference: {:.2f} seconds".format(the_time))
+
+
+with open("lstm_time.txt", "a") as file:
+    file.write(
+        "\nEvaluate with options. GPU({}) / GMEM({}) / MEMG({}) / CPU({})".format(
+            USE_GPU, GPU_MEM_LIMIT, MEMORY_GROWTH, CPU_CORES
+        )
+    )
+    file.write("\n{}".format(the_time))
+    file.write("\n")
