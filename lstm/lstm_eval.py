@@ -24,6 +24,12 @@ import warnings
 import string, time
 import contractions
 
+os.environ["TF_CPP_MIN_LOG_LEVEL"] = "2"
+warnings.filterwarnings("ignore")
+
+DATASET = "./IMDB Dataset.csv"
+TRAINED_MODEL = "lstm_model_heavy.h5"
+
 
 chat_words = {
     "AFAIK": "As Far As I Know",
@@ -118,24 +124,91 @@ chat_words = {
 }
 
 
-physical_devices = tf.config.list_physical_devices("GPU")
-if not physical_devices:
-    print("No GPU detected, using CPU")
-else:
-    print(f"GPU detected: {physical_devices}")
-    # Optionally set memory growth
-    tf.config.experimental.set_memory_growth(physical_devices[0], True)
+#####################
+# Argument Parsing
+#####################
+def parse_args():
+    parser = argparse.ArgumentParser(
+        description="LSTM inference with GPU memory limitation and CPU core limitation."
+    )
+    parser.add_argument(
+        "--gpu",
+        action="store_true",
+        help="Use GPU for inference. (Default = False)",
+    )
+    parser.add_argument(
+        "--gpu_mem_limit",
+        type=int,
+        default=0,
+        help="Limit GPU memory usage in MB. Set to 0 for no limit. (Default = 512)",
+    )
+    parser.add_argument(
+        "--memory_growth",
+        action="store_true",
+        help="Enable GPU memory growth. (Default = False)",
+    )
+    parser.add_argument(
+        "--cpu_cores",
+        type=int,
+        default=None,
+        help="Limit the number of CPU cores for TensorFlow. Set to None for no limit.",
+    )
+    return parser.parse_args()
+
+
+args = parse_args()
+
+# Configurations
+USE_GPU = args.gpu
+GPU_MEM_LIMIT = args.gpu_mem_limit
+MEMORY_GROWTH = args.memory_growth
+CPU_CORES = args.cpu_cores
 
 
 #####################
-# Load and Preprocess Data
+# GPU Setup
+#####################
+def setup_gpu(use_gpu=True, memory_growth=False, gpu_mem_limit=0):
+    if not use_gpu:
+        os.environ["CUDA_VISIBLE_DEVICES"] = ""  # Disable GPU
+
+    gpus = tf.config.list_physical_devices("GPU")
+    if gpus:
+        print("Number of GPUs Available: {}".format(len(gpus)))
+
+        # Set memory growth and memory limit
+        for gpu in gpus:
+            if memory_growth:
+                tf.config.experimental.set_memory_growth(gpu, True)
+            if gpu_mem_limit > 0:
+                tf.config.set_logical_device_configuration(
+                    gpu,
+                    [tf.config.LogicalDeviceConfiguration(memory_limit=gpu_mem_limit)],
+                )
+
+
+#####################
+# CPU Setup (Limit CPU cores)
+#####################
+def setup_cpu(cpu_cores=None):
+    if cpu_cores:
+        # Limit the number of CPU cores TensorFlow uses
+        tf.config.threading.set_intra_op_parallelism_threads(cpu_cores)
+        tf.config.threading.set_inter_op_parallelism_threads(cpu_cores)
+        print("Limiting TensorFlow to {} CPU cores.".format(cpu_cores))
+    else:
+        print("Using all available CPU cores.")
+
+
+setup_gpu(USE_GPU, MEMORY_GROWTH, GPU_MEM_LIMIT)
+setup_cpu(CPU_CORES)
+
+#####################
+# Data Preparation
 #####################
 # Load the dataset
 # Please replace the path with the actual path to the IMDB dataset
-data = pd.read_csv("./IMDB Dataset.csv")
-
-# import nltk
-# nltk.download('stopwords')
+data = pd.read_csv(DATASET)
 
 # Text preprocessing
 STOPWORDS = set(stopwords.words("english"))
@@ -204,7 +277,6 @@ data["review"] = data["review"].apply(clean_text)
 data["review"] = data["review"].apply(remove_emoji)
 data["review"] = data["review"].apply(expand_contractions)
 
-
 #####################
 # Tokenization and Seqeunce Padding
 #####################
@@ -224,7 +296,7 @@ print("Found %s unique tokens." % len(word_index))
 
 X = tokenizer.texts_to_sequences(data["review"].values)
 X = pad_sequences(X, maxlen=MAX_SEQUENCE_LENGTH)
-print("Shape of data tensor:", X.shape)
+# print("Shape of data tensor:", X.shape)
 
 
 #####################
@@ -232,71 +304,38 @@ print("Shape of data tensor:", X.shape)
 #####################
 # Converting categorical labels to numbers.
 Y = pd.get_dummies(data["sentiment"]).values
-print("Shape of label tensor:", Y.shape)
+# print("Shape of label tensor:", Y.shape)
 
 # Train test split
 split_idx = int(0.8 * len(X))  # 80% training, 20% testing
 X_train, X_test = X[:split_idx], X[split_idx:]
 Y_train, Y_test = Y[:split_idx], Y[split_idx:]
 
-print(X_train.shape, Y_train.shape)
+# print(X_train.shape, Y_train.shape)
 print(X_test.shape, Y_test.shape)
 
+#####################
+# LSTM Model Creation for Inference
+#####################
+loaded_model = load_model(TRAINED_MODEL)
 
 #####################
-# Define and train the model
+# Inference Timing
 #####################
+start_time = time.time()
+accr = loaded_model.evaluate(X_test, Y_test)
+end_time = time.time()
 
-## Light LSTM model
-# model = Sequential()
-# model.add(Embedding(MAX_NB_WORDS, EMBEDDING_DIM, input_length=X.shape[1]))
-# model.add(SpatialDropout1D(0.2))
-# model.add(LSTM(100, dropout=0.2, recurrent_dropout=0.2))
-# model.add(Dense(2, activation="softmax"))
-# model.compile(loss="categorical_crossentropy", optimizer="adam", metrics=["accuracy"])
-# print(model.summary())
+the_time = end_time - start_time
 
-## Heavy LSTM model
-model = Sequential()
-model.add(Embedding(MAX_NB_WORDS, EMBEDDING_DIM, input_length=X.shape[1]))
-model.add(SpatialDropout1D(0.3))
-
-# Add multiple LSTM layers with more units
-# model.add(LSTM(256, return_sequences=True, dropout=0.3, recurrent_dropout=0.3))
-model.add(LSTM(128, return_sequences=True, dropout=0.3, recurrent_dropout=0.3))
-model.add(LSTM(100, dropout=0.3, recurrent_dropout=0.3))
-
-# Additional dense layers for more complexity
-# model.add(Dense(128, activation="relu"))
-# model.add(Dropout(0.5))
-model.add(Dense(64, activation="relu"))
-model.add(Dropout(0.5))
-
-# Output layer
-model.add(Dense(2, activation="softmax"))
-
-# Compile the model
-model.compile(loss="categorical_crossentropy", optimizer="adam", metrics=["accuracy"])
-print(model.summary())
-
-
-# Train the model
-epochs = 5
-batch_size = 64
-
-history = model.fit(
-    X_train, Y_train, epochs=epochs, batch_size=batch_size, validation_split=0.1
-)
-
-
-#####################
-# Validate the Mode
-#####################
-# Validate the model
-accr = model.evaluate(X_test, Y_test)
 print("Test set\n  Loss: {:0.3f}\n  Accuracy: {:0.3f}".format(accr[0], accr[1]))
+print("Time taken for inference: {:.2f} seconds".format(the_time))
 
-#####################
-# Save the Model
-#####################
-model.save("lstm_model_heavy.h5")
+with open("lstm_time.txt", "a") as file:
+    file.write(
+        "\nEvaluate with options. GPU({}) / GMEM({}) / MEMG({}) / CPU({})".format(
+            USE_GPU, GPU_MEM_LIMIT, MEMORY_GROWTH, CPU_CORES
+        )
+    )
+    file.write("\n{}".format(the_time))
+    file.write("\n")
