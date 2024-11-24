@@ -39,3 +39,7 @@ tar xvf gru_light.tar
 import nltk
 nltk.download('stopwords')
 ```
+
+```
+python3 lstm_eval.py --gpu --memory_growth
+```
