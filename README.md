@@ -7,6 +7,12 @@
 tar cvf - lstm_model_heavy.h5 | split -b 20m - lstm_heavy.tar.
 ```
 
+---
+
+```
+cat ds.tar.* > ds.tar
+tar xvf ds.tar
+```
 ```
 cat lstm_heavy.tar.* > lstm_heavy.tar
 tar xvf lstm_heavy.tar
