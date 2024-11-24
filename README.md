@@ -1,6 +1,8 @@
 # edge
 졸업 프로젝트
 
+---
+
 ```
 tar cvf - lstm_model_heavy.h5 | split -b 20m - lstm_heavy.tar.
 ```
@@ -21,4 +23,9 @@ tar xvf gru_heavy.tar
 cat gru_light.tar.* > gru_light.tar
 tar xvf gru_light.tar
 ```
+---
 
+```
+import nltk
+nltk.download('stopwords')
+```
