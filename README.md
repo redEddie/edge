@@ -34,6 +34,9 @@ cat gru_light.tar.* > gru_light.tar
 tar xvf gru_light.tar
 ```
 ---
+```
+chmod +x filename.sh
+```
 
 ```
 import nltk
