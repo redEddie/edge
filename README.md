@@ -33,10 +33,8 @@ tar xvf gru_heavy.tar
 cat gru_light.tar.* > gru_light.tar
 tar xvf gru_light.tar
 ```
+
 ---
-```
-chmod +x filename.sh
-```
 
 ```
 import nltk
@@ -45,4 +43,13 @@ nltk.download('stopwords')
 
 ```
 python3 lstm_eval.py --gpu --memory_growth
+```
+
+---
+
+```
+chmod +x filename.sh
+```
+```
+./run_lstm.sh
 ```
