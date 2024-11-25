@@ -6,7 +6,7 @@ REPEAT=12
 for i in $(seq 1 $REPEAT)
 do
   echo ">>> Evaluation $i with Mem_Growth"
-  python3 gru_eval.py --gpu --memory_growth True
+  python3 gru_eval.py --gpu --memory_growth
 done
 
 for i in $(seq 1 $REPEAT)
