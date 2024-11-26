@@ -332,7 +332,7 @@ print("Test set\n  Loss: {:0.3f}\n  Accuracy: {:0.3f}".format(accr[0], accr[1]))
 print("Time taken for inference: {:.2f} seconds".format(the_time))
 
 
-with open("lstm_time.txt", "a") as file:
+with open("gru_time.txt", "a") as file:
     file.write(
         "\nEvaluate with options. GPU({}) / GMEM({}) / MEMG({}) / CPU({})".format(
             USE_GPU, GPU_MEM_LIMIT, MEMORY_GROWTH, CPU_CORES
