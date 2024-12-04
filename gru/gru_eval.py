@@ -28,7 +28,7 @@ os.environ["TF_CPP_MIN_LOG_LEVEL"] = "2"
 warnings.filterwarnings("ignore")
 
 DATASET = "./IMDB Dataset.csv"
-TRAINED_MODEL = "gru_model_lstm.h5"
+TRAINED_MODEL = "gru_model_light.h5"
 OUTPUT_FILE = "gru_time.txt"
 
 chat_words = {
