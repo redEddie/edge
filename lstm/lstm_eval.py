@@ -27,8 +27,8 @@ import contractions
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "2"
 warnings.filterwarnings("ignore")
 
-DATASET = "./IMDB Dataset.csv"
-TRAINED_MODEL = "lstm_model_light.h5"
+DATASET = "../IMDB Dataset.csv"
+TRAINED_MODEL = "lstm_model.h5"
 
 
 chat_words = {

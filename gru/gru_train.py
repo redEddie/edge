@@ -7,7 +7,15 @@ import pandas as pd
 from tensorflow.keras.preprocessing.text import Tokenizer
 from tensorflow.keras.preprocessing.sequence import pad_sequences
 from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import Dense, Embedding, LSTM, SpatialDropout1D, GRU, Dropout, BatchNormalization
+from tensorflow.keras.layers import (
+    Dense,
+    Embedding,
+    LSTM,
+    SpatialDropout1D,
+    GRU,
+    Dropout,
+    BatchNormalization,
+)
 from tensorflow.keras.utils import to_categorical
 from tensorflow.keras.models import load_model
 from nltk.corpus import stopwords
@@ -148,15 +156,18 @@ def clean_text(text):
     )  # Substituting multiple spaces with single space
     return text
 
+
 def remove_url(text):
-    pattern = re.compile(r'https?://\S+|www\.\S+')
-    return pattern.sub(r'',text)
+    pattern = re.compile(r"https?://\S+|www\.\S+")
+    return pattern.sub(r"", text)
+
 
 def remove_punctuation(text):
-    return text.translate(str.maketrans('','',string.punctuation))
+    return text.translate(str.maketrans("", "", string.punctuation))
+
 
 def chat_conversion(text):
-    new_text=[]
+    new_text = []
     for w in text.split():
         if w.upper() in chat_words:
             new_text.append(chat_words[w.upper()])
@@ -164,29 +175,34 @@ def chat_conversion(text):
             new_text.append(w)
     return " ".join(new_text)
 
+
 def remove_emoji(text):
-    emoji_pattern = re.compile("["
-                           u"\U0001F600-\U0001F64F"  # emoticons
-                           u"\U0001F300-\U0001F5FF"  # symbols & pictographs
-                           u"\U0001F680-\U0001F6FF"  # transport & map symbols
-                           u"\U0001F1E0-\U0001F1FF"  # flags (iOS)
-                           u"\U00002702-\U000027B0"
-                           u"\U000024C2-\U0001F251"
-                           "]+", flags=re.UNICODE)
-    return emoji_pattern.sub(r'', text)
+    emoji_pattern = re.compile(
+        "["
+        "\U0001F600-\U0001F64F"  # emoticons
+        "\U0001F300-\U0001F5FF"  # symbols & pictographs
+        "\U0001F680-\U0001F6FF"  # transport & map symbols
+        "\U0001F1E0-\U0001F1FF"  # flags (iOS)
+        "\U00002702-\U000027B0"
+        "\U000024C2-\U0001F251"
+        "]+",
+        flags=re.UNICODE,
+    )
+    return emoji_pattern.sub(r"", text)
+
 
 def expand_contractions(text):
     expanded_text = contractions.fix(text)
     return expanded_text
 
 
-data['review'] = data['review'].str.lower()
-data['review'] = data['review'].apply(remove_url)
-data['review'] = data['review'].apply(remove_punctuation)
-data['review'] = data['review'].apply(chat_conversion)
+data["review"] = data["review"].str.lower()
+data["review"] = data["review"].apply(remove_url)
+data["review"] = data["review"].apply(remove_punctuation)
+data["review"] = data["review"].apply(chat_conversion)
 data["review"] = data["review"].apply(clean_text)
-data['review']=data['review'].apply(remove_emoji)
-data['review'] = data['review'].apply(expand_contractions)
+data["review"] = data["review"].apply(remove_emoji)
+data["review"] = data["review"].apply(expand_contractions)
 
 #####################
 # Tokenization and Seqeunce Padding
@@ -258,4 +274,4 @@ print("Test set\n  Loss: {:0.3f}\n  Accuracy: {:0.3f}".format(accr[0], accr[1]))
 #####################
 # Save the Model
 #####################
-model.save("gru_model_light.h5")
+model.save("gru_model.h5")
