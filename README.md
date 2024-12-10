@@ -1,6 +1,15 @@
 # edge
 졸업 프로젝트
 
+
+### Docker images
+* nano
+docker pull nvcr.io/nvidia/l4t-tensorflow:r32.7.1-tf2.7-py3
+
+* orin
+docker pull nvcr.io/nvidia/l4t-tensorflow:r35.3.1-tf2.11-py3 
+
+
 ```
 git clone https://github.com/redEddie/edge.git
 ```
