@@ -246,7 +246,6 @@ print(X_test.shape, Y_test.shape)
 #####################
 # Define and train the model
 #####################
-
 # Light LSTM model
 model = Sequential()
 model.add(Embedding(MAX_NB_WORDS, EMBEDDING_DIM, input_length=X.shape[1]))
@@ -256,27 +255,6 @@ model.add(LSTM(100, dropout=0.2, recurrent_dropout=0.2))
 model.add(Dense(2, activation="softmax"))
 model.compile(loss="categorical_crossentropy", optimizer="adam", metrics=["accuracy"])
 
-# ## Heavy LSTM model
-# model = Sequential()
-# model.add(Embedding(MAX_NB_WORDS, EMBEDDING_DIM, input_length=X.shape[1]))
-# model.add(SpatialDropout1D(0.3))
-
-# # Add multiple LSTM layers with more units
-# # model.add(LSTM(256, return_sequences=True, dropout=0.3, recurrent_dropout=0.3))
-# model.add(LSTM(128, return_sequences=True, dropout=0.3, recurrent_dropout=0.3))
-# model.add(LSTM(100, dropout=0.3, recurrent_dropout=0.3))
-
-# # Additional dense layers for more complexity
-# # model.add(Dense(128, activation="relu"))
-# # model.add(Dropout(0.5))
-# model.add(Dense(64, activation="relu"))
-# model.add(Dropout(0.5))
-
-# # Output layer
-# model.add(Dense(2, activation="softmax"))
-
-# # Compile the model
-# model.compile(loss="categorical_crossentropy", optimizer="adam", metrics=["accuracy"])
 # print(model.summary())
 
 
