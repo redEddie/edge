@@ -47,8 +47,11 @@ tar cvf - lstm_model_heavy.h5 | split -b 20m - lstm_heavy.tar.
 ```
 
 5. Meet the library dependencies.
+```
+pip3 install pandas nltk 
+```
 
-6. Run code to download nltk files.
+7. Run code to download nltk files.
 ```
 import nltk
 nltk.download('stopwords')
