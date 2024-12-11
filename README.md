@@ -14,12 +14,20 @@
 
 # Run
 
+1. run `*_run.sh` for container
+
+2. env
+```
+apt update
+apt install tmux
+```
+
 1. Clone this repo
 ```
 git clone https://github.com/redEddie/edge.git
 ```
 
-2. Unzip the files
+1. Unzip the files
 ```
 cat ds.tar.* > ds.tar
 tar xvf ds.tar
@@ -46,20 +54,20 @@ tar xvf gru_light.tar
 tar cvf - lstm_model_heavy.h5 | split -b 20m - lstm_heavy.tar.
 ```
 
-3. Meet the library dependencies.
+1. Meet the library dependencies.
 
-4. Run code to download nltk files.
+1. Run code to download nltk files.
 ```
 import nltk
 nltk.download('stopwords')
 ```
 
-5. Check the code runs.
+1. Check the code runs.
 ```
 python3 lstm_eval.py --gpu --memory_growth
 ```
 
-6. Evaluate the models.
+1. Evaluate the models.
 ```
 chmod +x filename.sh
 ```
