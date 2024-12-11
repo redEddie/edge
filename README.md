@@ -14,17 +14,16 @@
 
 # Run
 
-1. run `*_run.sh` for container
+1. Clone this repo at `home` directory
+```
+git clone https://github.com/redEddie/edge.git
+```
+2. run `*_run.sh` for container
 
-2. env
+3. env
 ```
 apt update
 apt install tmux nano
-```
-
-3. Clone this repo
-```
-git clone https://github.com/redEddie/edge.git
 ```
 
 4. Unzip the files
