@@ -132,7 +132,7 @@ else:
 #####################
 # Load the dataset
 # Please replace the path with the actual path to the IMDB dataset
-data = pd.read_csv("./IMDB Dataset.csv")
+data = pd.read_csv("../IMDB Dataset.csv")
 
 # import nltk
 # nltk.download('stopwords')
