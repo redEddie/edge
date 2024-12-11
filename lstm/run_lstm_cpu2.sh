@@ -2,7 +2,7 @@
 
 # Constants
 REPEAT=12
-CORES=(8 7 6 5 4 3 2 1)
+CORES=(6 5 4 3 2 1)
 
 for core in "${CORES[@]}"
 do
