@@ -19,7 +19,7 @@
 2. env
 ```
 apt update
-apt install tmux
+apt install tmux nano
 ```
 
 3. Clone this repo
