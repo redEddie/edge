@@ -56,8 +56,10 @@ pip3 install pandas nltk contractions
 ```
 Only for nano
 ```
-pip uninstall -y keras 
-pip install keras==2.7.0
+pip3 install --upgrade pip 
+apt update && apt upgrade -y && apt autoremove -y && apt clean 
+python3 -m pip uninstall -y keras 
+python3 -m pip install keras==2.7.0
 ```
 
 7. Run code to download nltk files.
