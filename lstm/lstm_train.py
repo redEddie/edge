@@ -24,6 +24,7 @@ import warnings
 import string, time
 import contractions
 
+LOAD_FILE = "../IMDB Dataset.csv"
 
 chat_words = {
     "AFAIK": "As Far As I Know",
@@ -132,7 +133,7 @@ else:
 #####################
 # Load the dataset
 # Please replace the path with the actual path to the IMDB dataset
-data = pd.read_csv("../IMDB Dataset.csv")
+data = pd.read_csv(LOAD_FILE)
 
 # import nltk
 # nltk.download('stopwords')
