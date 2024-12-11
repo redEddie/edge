@@ -51,6 +51,11 @@ tar cvf - lstm_model_heavy.h5 | split -b 20m - lstm_heavy.tar.
 pip3 install --upgrade pip
 pip3 install pandas nltk contractions
 ```
+Only for nano
+```
+python3 -m pip uninstall -y keras 
+python3 -m pip install keras==2.7.0
+```
 
 7. Run code to download nltk files.
 ```
