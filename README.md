@@ -22,8 +22,7 @@ git clone https://github.com/redEddie/edge.git
 
 3. env
 ```
-apt update
-apt install tmux nano
+apt update && apt install -y tmux nano
 ```
 
 4. Unzip the files
